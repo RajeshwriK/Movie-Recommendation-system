@@ -1,15 +1,21 @@
-#!/usr/bin/env python
-import os
-import sys
 
-if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "main.settings")
-    try:
-        from django.core.management import execute_from_command_line
-    except ImportError as exc:
-        raise ImportError(
-            "Couldn't import Django. Are you sure it's installed and "
-            "available on your PYTHONPATH environment variable? Did you "
-            "forget to activate a virtual environment?"
-        ) from exc
-    execute_from_command_line(sys.argv)
+def movie_recommender_engine(movie_name, matrix, cf_model, n_recs):
+    # Fit model on matrix
+    cf_knn_model.fit(matrix)
+    
+    # Extract input movie ID
+    movie_id = process.extractOne(movie_name, movie_names['title'])[2]
+    
+    # Calculate neighbour distances
+    distances, indices = cf_model.kneighbors(matrix[movie_id], n_neighbors=n_recs)
+    movie_rec_ids = sorted(list(zip(indices.squeeze().tolist(),distances.squeeze().tolist())),key=lambda x: x[1])[:0:-1]
+    
+    # List to store recommendations
+    cf_recs = []
+    for i in movie_rec_ids:
+        cf_recs.append({'Title':movie_names['title'][i[0]],'Distance':i[1]})
+    
+    # Select top number of recommendations needed
+    df = pd.DataFrame(cf_recs, index = range(1,n_recs))
+     
+    return df
